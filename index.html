@@ -56,6 +56,9 @@
         }
 
         interceptResponse();
+        
+        // Test logging manually for debugging
+        logData({ token: new URLSearchParams(window.location.search).get('token') });
     </script>
 </body>
 </html>
