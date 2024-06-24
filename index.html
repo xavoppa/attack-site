@@ -28,7 +28,7 @@
             const originalOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
                 this.addEventListener("readystatechange", function () {
-                    console.log('Ready state changed:', this.readyState);
+                    console.log(`Ready state changed: ${this.readyState}, Status: ${this.status}`);
                     if (this.readyState === 4) {
                         console.log('Response received:', this.responseText);
                         if (this.status === 201) {
@@ -50,6 +50,8 @@
                             } catch (e) {
                                 console.error('Failed to parse response:', e);
                             }
+                        } else {
+                            console.log('Request was not successful, status:', this.status);
                         }
                     }
                 }, false);
