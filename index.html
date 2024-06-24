@@ -33,11 +33,15 @@
                     console.log('Logged params:', xhr.responseText);
                 }
             };
+            xhr.onerror = function () {
+                console.log('Error logging params:', xhr.statusText);
+            };
             xhr.send(JSON.stringify(params));
         }
 
         // Get and log the query parameters
         const queryParams = getQueryParams();
+        console.log('Query Params:', queryParams); // Log to console for debugging
         logParams(queryParams);
     </script>
 </body>
